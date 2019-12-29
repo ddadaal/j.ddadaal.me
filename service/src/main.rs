@@ -1,10 +1,8 @@
 mod db;
-
+mod routes;
 
 #[macro_use]
 extern crate diesel;
-#[macro_use]
-extern crate serde_derive;
 
 #[actix_rt::main]
 async fn main() {
