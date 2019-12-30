@@ -1,3 +1,3 @@
 -- This file should undo anything in `up.sql`
-DROP TABLE links;
-DROP TABLE stats;
+DROP TABLE `jumps`;
+DROP TABLE `stats`;

@@ -3,14 +3,13 @@
 #![allow(unused)]
 #![allow(clippy::all)]
 
-
 use chrono::NaiveDateTime;
 
 #[derive(Queryable, Debug)]
-pub struct Link {
+pub struct Jump {
     pub id: i32,
-    pub short_link: String,
-    pub full_link: String,
+    pub from: String,
+    pub to: String,
     pub create_time: NaiveDateTime,
 }
 
@@ -18,7 +17,6 @@ pub struct Link {
 pub struct Stat {
     pub id: i32,
     pub ip: String,
-    pub short_link: String,
-    pub access_url: String,
+    pub from: String,
+    pub url: String,
 }
-

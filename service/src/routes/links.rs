@@ -5,36 +5,36 @@ use diesel::prelude::*;
 use tokio_diesel::{OptionalExtension, *};
 
 /// The redirection
-#[get("/{short_link}")]
+#[get("/{from}")]
 pub async fn get_link(info: web::Path<String>, pool: web::Data<Pool>) -> impl Responder {
-    use crate::db::schema::links;
-    let short_link = info.into_inner();
+    use crate::db::schema::jumps;
+    let from = info.into_inner();
 
-    info!("Jump requested: {}", short_link);
+    info!("Jump requested: {}", from);
 
     // SELECT full_link FROM links WHERE short_link = {short_link};
-    let full_link = links::table
-        .filter(links::short_link.eq(short_link.clone()))
+    let target = jumps::table
+        .filter(jumps::from.eq(from.clone()))
         .limit(1)
-        .select(links::full_link)
+        .select(jumps::to)
         .get_result_async::<String>(&pool)
         .await;
 
-    match full_link.optional() {
+    match target.optional() {
         Ok(result) => match result {
-            Some(full_link) => {
-                info!("Jump successful: {} => {}", short_link, full_link);
+            Some(target) => {
+                info!("Jump successful: {} => {}", from, target);
                 HttpResponse::MovedPermanently()
-                    .header(http::header::LOCATION, full_link)
+                    .header(http::header::LOCATION, target)
                     .finish()
             }
             None => {
-                info!("No jump: {}", short_link);
+                info!("No jump: {}", from);
                 HttpResponse::NotFound().finish()
             }
         },
         Err(err) => {
-            error!("500 when processing /{}: {}", short_link, err);
+            error!("500 when processing /{}: {}", from, err);
             HttpResponse::InternalServerError().finish()
         }
     }

@@ -1,8 +1,8 @@
 table! {
-    links (id) {
+    jumps (id) {
         id -> Integer,
-        short_link -> Text,
-        full_link -> Text,
+        from -> Text,
+        to -> Text,
         create_time -> Timestamp,
     }
 }
@@ -11,12 +11,12 @@ table! {
     stats (id) {
         id -> Integer,
         ip -> Text,
-        short_link -> Text,
-        access_url -> Text,
+        from -> Text,
+        url -> Text,
     }
 }
 
 allow_tables_to_appear_in_same_query!(
-    links,
+    jumps,
     stats,
 );
