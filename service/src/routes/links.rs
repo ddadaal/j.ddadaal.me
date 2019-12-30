@@ -2,6 +2,7 @@ use crate::Pool;
 use actix_web::HttpResponse;
 use actix_web::{get, http, web, Responder};
 use diesel::prelude::*;
+use log::{error, info};
 use tokio_diesel::{OptionalExtension, *};
 
 /// The redirection
@@ -27,7 +28,7 @@ pub async fn get_link(info: web::Path<String>, pool: web::Data<Pool>) -> impl Re
                 HttpResponse::MovedPermanently()
                     .header(http::header::LOCATION, target)
                     .finish()
-            }
+            },
             None => {
                 info!("No jump: {}", from);
                 HttpResponse::NotFound().finish()

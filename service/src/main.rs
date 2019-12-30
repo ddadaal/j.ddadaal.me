@@ -4,9 +4,6 @@ mod routes;
 #[macro_use]
 extern crate diesel;
 
-#[macro_use]
-extern crate log;
-
 use actix_web::{middleware, App, HttpServer};
 use diesel::prelude::SqliteConnection;
 use diesel::r2d2::{self, ConnectionManager};
