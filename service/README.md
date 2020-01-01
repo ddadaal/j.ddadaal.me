@@ -1,6 +1,6 @@
-# Backend for j.ddadaal.me
+# Service for j.ddadaal.me
 
-Backend for j.ddadaal.me written in Rust with [actix-web](https://github.com/actix/actix-web).
+Service for j.ddadaal.me written in Rust with [actix-web](https://github.com/actix/actix-web).
 
 ## Features
 
@@ -14,7 +14,6 @@ Backend for j.ddadaal.me written in Rust with [actix-web](https://github.com/act
 - Arch Linux WSL
 - Rust under WSL
 - VSCode Remote Development connecting to WSL
-- docker & docker-compose 
 
 ## Getting Started
 

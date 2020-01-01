@@ -12,7 +12,7 @@ A URL shortening service.
 
 ## Development
 
-For backend development, checkout `backend` directory
+For backend development, checkout `service` directory
 
 ## License
 
