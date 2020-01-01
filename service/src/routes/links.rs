@@ -1,11 +1,8 @@
 use crate::data::repositories::jumps::JumpsRepository;
 use crate::data::repositories::stats::StatsRepository;
-use crate::Pool;
 use actix_web::HttpResponse;
-use actix_web::{dev, get, http, web, Responder};
+use actix_web::{get, http, web, Responder};
 use chrono;
-use diesel::prelude::*;
-use futures::future::FutureExt;
 use log::{error, info};
 use std::sync::Arc;
 
@@ -18,7 +15,6 @@ pub async fn get_link(
     req: web::HttpRequest,
 ) -> impl Responder {
     let from = info.into_inner();
-
     info!("Jump requested: {}", from);
 
     let target = jumps_repo.get_jump_link(from.clone()).await;
@@ -82,10 +78,33 @@ pub async fn get_link(
 mod test {
 
     use super::*;
-    use actix_web::{test, HttpMessage, HttpRequest, HttpResponse};
+    use crate::data::db::models::Jump;
+    use crate::data::repositories::jumps::mock::JumpsRepositoryMock;
+    use crate::data::repositories::stats::mock::StatsRepositoryMock;
+    use actix_service::Service;
+    use actix_web::{test, App, HttpMessage, HttpRequest, HttpResponse};
 
-    #[test]
-    fn test() {
-        // let req = test::TestRequest::get().uri("/123").app_data(data: T)
+    #[actix_rt::test]
+    async fn test_no_jump() {
+        let jumps_repo = Arc::new(JumpsRepositoryMock::new(vec![(
+            "/123",
+            "https://github.com",
+        )]));
+
+        let stats_repo = Arc::new(StatsRepositoryMock::new());
+
+        let mut app = test::init_service(
+            App::new()
+                .data::<Arc<dyn JumpsRepository>>(jumps_repo.clone())
+                .data::<Arc<dyn StatsRepository>>(stats_repo.clone())
+                .service(get_link),
+        )
+        .await;
+
+        let req = test::TestRequest::with_uri("/123").to_request();
+
+        let resp = app.call(req).await.unwrap();
+
+        assert_eq!(resp.status(), StatusCode::MovedPermanently);
     }
 }

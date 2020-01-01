@@ -34,3 +34,44 @@ impl JumpsRepositoryImpl {
         JumpsRepositoryImpl { pool }
     }
 }
+
+#[cfg(test)]
+pub mod mock {
+    use super::*;
+    use crate::data::db::models::Jump;
+    use chrono;
+
+    #[derive(Clone)]
+    pub struct JumpsRepositoryMock {
+        data: Vec<Jump>,
+    }
+
+    #[async_trait]
+    impl JumpsRepository for JumpsRepositoryMock {
+        async fn get_jump_link(&self, from: String) -> RepositoryResult<Option<String>> {
+            Ok(self
+                .data
+                .iter()
+                .filter(|x| x.from == from)
+                .nth(0)
+                .map(|x| x.to.clone()))
+        }
+    }
+
+    impl JumpsRepositoryMock {
+        pub fn new<'a>(vec: Vec<(&str, &str)>) -> Self {
+            JumpsRepositoryMock {
+                data: vec
+                    .into_iter()
+                    .enumerate()
+                    .map(|(i, (from, to))| Jump {
+                        id: i as i32,
+                        from: from.into(),
+                        to: to.into(),
+                        create_time: chrono::Local::now().naive_utc(),
+                    })
+                    .collect(),
+            }
+        }
+    }
+}

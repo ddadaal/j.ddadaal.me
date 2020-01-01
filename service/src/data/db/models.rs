@@ -5,7 +5,7 @@
 use super::schema::*;
 use chrono::NaiveDateTime;
 
-#[derive(Queryable, Debug)]
+#[derive(Queryable, Debug, Clone)]
 pub struct Jump {
     pub id: i32,
     pub from: String,
