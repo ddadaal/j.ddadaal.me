@@ -11,8 +11,9 @@ table! {
     stats (id) {
         id -> Integer,
         ip -> Text,
-        from -> Text,
+        jump_from -> Text,
         url -> Text,
+        time -> Timestamp,
     }
 }
 
