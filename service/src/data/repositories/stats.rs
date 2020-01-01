@@ -61,7 +61,6 @@ pub mod mock {
     use super::*;
     use crate::data::db::models::Stat;
     use chrono;
-    use std::cell::RefCell;
     use std::sync::Arc;
     use std::sync::Mutex;
     use std::sync::MutexGuard;

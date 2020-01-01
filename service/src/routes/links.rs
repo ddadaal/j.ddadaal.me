@@ -78,12 +78,10 @@ pub async fn get_link(
 mod test {
 
     use super::*;
-    use crate::data::db::models::Jump;
     use crate::data::repositories::jumps::mock::JumpsRepositoryMock;
     use crate::data::repositories::stats::mock::StatsRepositoryMock;
     use actix_service::Service;
-    use actix_web::http::header::HeaderMap;
-    use actix_web::{test, App, HttpMessage, HttpRequest, HttpResponse};
+    use actix_web::{test, App};
 
     // can not extract duplicate code
     // 1. extract get_response(url: String) -> ServerResponse
