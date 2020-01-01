@@ -7,6 +7,20 @@ Service for j.ddadaal.me written in Rust with [actix-web](https://github.com/act
 - RESTful HTTP API
 - Async for all its glory!
 
+## API Docs
+
+Only one API is implemented:
+
+```
+Request: GET /{short_link}
+
+Response:
+- 301, header Location is set to the target URL
+- 404, no target URL associated to the provided short_link is found
+- 500, Internal server error
+
+```
+
 ## Development 
 
 ### Dev Environment
