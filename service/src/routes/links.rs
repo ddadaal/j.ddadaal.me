@@ -82,17 +82,22 @@ mod test {
     use crate::data::repositories::jumps::mock::JumpsRepositoryMock;
     use crate::data::repositories::stats::mock::StatsRepositoryMock;
     use actix_service::Service;
+    use actix_web::http::header::HeaderMap;
     use actix_web::{test, App, HttpMessage, HttpRequest, HttpResponse};
 
+    // can not extract duplicate code
+    // 1. extract get_response(url: String) -> ServerResponse
+    //    not possible for ServerResponse is private
+    // 2. extract get_app() -> impl actix_service::Service
+    //    after extraction some strange type error on app.call(req) pops up
+    //    it looks like some constraints on associated type not being satisfied
     #[actix_rt::test]
     async fn test_no_jump() {
         let jumps_repo = Arc::new(JumpsRepositoryMock::new(vec![(
-            "/123",
+            "123",
             "https://github.com",
         )]));
-
         let stats_repo = Arc::new(StatsRepositoryMock::new());
-
         let mut app = test::init_service(
             App::new()
                 .data::<Arc<dyn JumpsRepository>>(jumps_repo.clone())
@@ -101,10 +106,35 @@ mod test {
         )
         .await;
 
-        let req = test::TestRequest::with_uri("/123").to_request();
-
+        let req = test::TestRequest::with_uri("/another").to_request();
         let resp = app.call(req).await.unwrap();
+        assert_eq!(resp.status(), http::StatusCode::NOT_FOUND);
+    }
 
-        assert_eq!(resp.status(), StatusCode::MovedPermanently);
+    #[actix_rt::test]
+    async fn test_jump() {
+        let jumps_repo = Arc::new(JumpsRepositoryMock::new(vec![(
+            "123",
+            "https://github.com",
+        )]));
+        let stats_repo = Arc::new(StatsRepositoryMock::new());
+        let mut app = test::init_service(
+            App::new()
+                .data::<Arc<dyn JumpsRepository>>(jumps_repo.clone())
+                .data::<Arc<dyn StatsRepository>>(stats_repo.clone())
+                .service(get_link),
+        )
+        .await;
+        let req = test::TestRequest::with_uri("/123").to_request();
+        let resp = app.call(req).await.unwrap();
+        assert_eq!(resp.status(), http::StatusCode::MOVED_PERMANENTLY);
+        assert_eq!(
+            resp.headers()
+                .get(http::header::LOCATION)
+                .unwrap()
+                .to_str()
+                .unwrap(),
+            "https://github.com"
+        );
     }
 }
