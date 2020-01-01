@@ -33,6 +33,7 @@ Only Linux is tested. The development is under
 - Arch Linux WSL
 - Rust under WSL
 - VSCode Remote Development connecting to WSL
+- VSCode Rust extension with RLS
 
 ### Getting Started
 

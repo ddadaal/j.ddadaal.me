@@ -1,8 +1,8 @@
 # j.ddadaal.me
 
-!!! WIP !!!
-
 A URL shortening service.
+
+**WIP and backend is barely usable.**
 
 ## Features
 
@@ -12,7 +12,7 @@ A URL shortening service.
 
 ## Development
 
-For backend development, checkout `service` directory
+For backend checkout [`service`](/service) directory
 
 ## License
 
