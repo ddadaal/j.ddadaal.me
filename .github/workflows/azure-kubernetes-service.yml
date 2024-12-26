@@ -48,7 +48,7 @@ env:
   DEPLOYMENT_MANIFEST_PATH: ./manifests
   DOCKER_FILE: ./Dockerfile
   BUILD_CONTEXT_PATH: .
-  NAMESPACE: namespace-test
+  NAMESPACE: rust-url-shortener
 
 jobs:
   buildImage:
