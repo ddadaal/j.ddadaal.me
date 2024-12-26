@@ -6,7 +6,7 @@ metadata:
     app: test-app
     kubernetes.azure.com/generator: devhub
   name: test-app
-  namespace: namespace-workflow-1734327461146
+  namespace: rust-url-shortener
 spec:
   replicas: 1
   selector:
