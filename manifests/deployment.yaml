@@ -1,24 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: test-app
+  creationTimestamp: null
   labels:
     app: test-app
     kubernetes.azure.com/generator: devhub
+  name: test-app
   namespace: namespace-workflow-1734327461146
 spec:
   replicas: 1
   selector:
     matchLabels:
       app: test-app
+  strategy: {}
   template:
     metadata:
+      creationTimestamp: null
       labels:
         app: test-app
     spec:
       containers:
-        - name: test-app
-          image: jundachenacr.azurecr.io/rust-url-shortener:latest
-          imagePullPolicy: Always
-          ports:
-            - containerPort: 8080
+      - image: jundachenacr.azurecr.io/rust-url-shortener
+        imagePullPolicy: Always
+        name: test-app
+        ports:
+        - containerPort: 8080
+        resources: {}
+status: {}

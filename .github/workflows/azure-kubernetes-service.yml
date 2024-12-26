@@ -19,6 +19,7 @@
 #    - ACR_RESOURCE_GROUP (resource group of your ACR)
 #    - AZURE_CONTAINER_REGISTRY (name of your container registry / ACR)
 #    - CLUSTER_RESOURCE_GROUP (where your cluster is deployed)
+#    - CLUSTER_TYPE (the type of your cluster, managedClusters (AKS) or connectedClusters (Arc))
 #    - CLUSTER_NAME (name of your AKS cluster)
 #    - CONTAINER_NAME (name of the container image you would like to push up to your ACR)
 #    - DEPLOYMENT_MANIFEST_PATH (path to the manifest yaml for your deployment)
@@ -30,7 +31,7 @@
 # For more samples to get started with GitHub Action workflows to deploy to Azure, refer to https://github.com/Azure/actions-workflow-samples
 # For more options with the actions used below please refer to https://github.com/Azure/login
 
-name: test-app
+name: Build and deploy an app to AKS
 
 on:
   push:
@@ -42,13 +43,12 @@ env:
   AZURE_CONTAINER_REGISTRY: jundachenacr
   CONTAINER_NAME: rust-url-shortener
   CLUSTER_RESOURCE_GROUP: jundachen
-  CLUSTER_NAME: test-3
-  DEPLOYMENT_MANIFEST_PATH: |
-    manifests/deployment.yaml
-    manifests/service.yaml
+  CLUSTER_TYPE: connectedClusters
+  CLUSTER_NAME: test-3-arc
+  DEPLOYMENT_MANIFEST_PATH: ./manifests
   DOCKER_FILE: ./Dockerfile
-  BUILD_CONTEXT_PATH: ./
-  NAMESPACE: namespace-workflow-1734327461146
+  BUILD_CONTEXT_PATH: .
+  NAMESPACE: namespace-test
 
 jobs:
   buildImage:
@@ -98,22 +98,34 @@ jobs:
           kubelogin-version: 'v0.0.25'
 
       # Retrieves your Azure Kubernetes Service cluster's kubeconfig file
-      - name: Get K8s context
+      - name: Get K8s context from managed clusters
+        if: env.CLUSTER_TYPE == 'managedClusters' 
         uses: azure/aks-set-context@v3
         with:
           resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
           cluster-name: ${{ env.CLUSTER_NAME }}
           admin: 'false'
           use-kubelogin: 'true'
+    
+      - name: Get k8s context from connected clusters
+        if: env.CLUSTER_TYPE == 'connectedClusters'
+        run: |
+          configDir="${{ runner.temp }}/kubeconfig"
+          az connectedk8s proxy -n ${{ env.CLUSTER_NAME }} -g ${{ env.CLUSTER_RESOURCE_GROUP }} -f "$configDir/kubeconfig" &
+          echo "Waiting for kubeconfig..."
+          while [ ! -f "$configDir/kubeconfig" ]; do sleep 5; done
+          export KUBECONFIG="$configDir/kubeconfig"
+          echo "kubeconfig is ready at $KUBECONFIG"
 
       # Checks if the AKS cluster is private
       - name: Is private cluster
         id: isPrivate
+        if: env.CLUSTER_TYPE == 'managedClusters' 
         run: |
           result=$(az aks show --resource-group ${{ env.CLUSTER_RESOURCE_GROUP }} --name ${{ env.CLUSTER_NAME }} --query "apiServerAccessProfile.enablePrivateCluster")
           echo "PRIVATE_CLUSTER=$result" >> "$GITHUB_OUTPUT"
 
-      # Deploys application based on given manifest  file
+      # Deploys application based on given manifest file
       - name: Deploys application
         uses: Azure/k8s-deploy@v4
         with:
@@ -123,5 +135,5 @@ jobs:
             ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
           resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
           name: ${{ env.CLUSTER_NAME }}
-          private-cluster: ${{ steps.isPrivate.outputs.PRIVATE_CLUSTER == 'true' }}
+          private-cluster: ${{ env.CLUSTER_TYPE == 'managedClusters' && steps.isPrivate.outputs.PRIVATE_CLUSTER == 'true' }}
           namespace: ${{ env.NAMESPACE }}
