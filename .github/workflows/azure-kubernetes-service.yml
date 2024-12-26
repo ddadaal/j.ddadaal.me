@@ -110,11 +110,11 @@ jobs:
       - name: Get k8s context from connected clusters
         if: env.CLUSTER_TYPE == 'connectedClusters'
         run: |
-          configDir="${{ runner.temp }}/kubeconfig"
-          az connectedk8s proxy -n ${{ env.CLUSTER_NAME }} -g ${{ env.CLUSTER_RESOURCE_GROUP }} -f "$configDir/kubeconfig" &
+          export KUBECONFIG="${{ runner.temp }}/kubeconfig"
+          az connectedk8s proxy -n ${{ env.CLUSTER_NAME }} -g ${{ env.CLUSTER_RESOURCE_GROUP }} -f "$KUBECONFIG" &
           echo "Waiting for kubeconfig..."
-          while [ ! -f "$configDir/kubeconfig" ]; do sleep 5; done
-          export KUBECONFIG="$configDir/kubeconfig"
+          while [ ! -f "$KUBECONFIG" ]; do sleep 5; done
+          echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
           echo "kubeconfig is ready at $KUBECONFIG"
 
       # Checks if the AKS cluster is private
