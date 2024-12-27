@@ -43,8 +43,9 @@ env:
   AZURE_CONTAINER_REGISTRY: jundachenacr
   CONTAINER_NAME: rust-url-shortener
   CLUSTER_RESOURCE_GROUP: jundachen
-  CLUSTER_TYPE: connectedClusters
-  CLUSTER_NAME: test-3-arc
+  # CLUSTER_TYPE: connectedClusters
+  CLUSTER_TYPE: managedClusters
+  CLUSTER_NAME: test-3
   DEPLOYMENT_MANIFEST_PATH: ./manifests
   DOCKER_FILE: ./Dockerfile
   BUILD_CONTEXT_PATH: .
