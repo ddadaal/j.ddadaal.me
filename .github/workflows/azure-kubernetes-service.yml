@@ -56,6 +56,7 @@ jobs:
       contents: read
       id-token: write
     runs-on: ubuntu-latest
+    if: false
     steps:
       # Checks out the repository this file is in
       - uses: actions/checkout@v3
@@ -109,13 +110,20 @@ jobs:
     
       - name: Get k8s context from connected clusters
         if: env.CLUSTER_TYPE == 'connectedClusters'
-        run: |
-          export KUBECONFIG="${{ runner.temp }}/kubeconfig"
-          az connectedk8s proxy -n ${{ env.CLUSTER_NAME }} -g ${{ env.CLUSTER_RESOURCE_GROUP }} -f "$KUBECONFIG" &
-          echo "Waiting for kubeconfig..."
-          while [ ! -f "$KUBECONFIG" ]; do sleep 5; done
-          echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
-          echo "kubeconfig is ready at $KUBECONFIG"
+        uses: azure/k8s-set-context@v4
+        with:
+          method: service-principal
+          cluster-type: arc
+          cluster-name: ${{ env.CLUSTER_NAME }}
+          resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
+        
+        # run: |
+        #   export KUBECONFIG="${{ runner.temp }}/kubeconfig"
+        #   az connectedk8s proxy -n ${{ env.CLUSTER_NAME }} -g ${{ env.CLUSTER_RESOURCE_GROUP }} -f "$KUBECONFIG" &
+        #   echo "Waiting for kubeconfig..."
+        #   while [ ! -f "$KUBECONFIG" ]; do sleep 5; done
+        #   echo "KUBECONFIG=$KUBECONFIG" >> $GITHUB_ENV
+        #   echo "kubeconfig is ready at $KUBECONFIG"
 
       # Checks if the AKS cluster is private
       - name: Is private cluster
@@ -132,7 +140,7 @@ jobs:
           action: deploy
           manifests: ${{ env.DEPLOYMENT_MANIFEST_PATH }}
           images: |
-            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:${{ github.sha }}
+            ${{ env.AZURE_CONTAINER_REGISTRY }}.azurecr.io/${{ env.CONTAINER_NAME }}:4ef43531bbf1e465c3f667b9c66d4e7a260f3ccc
           resource-group: ${{ env.CLUSTER_RESOURCE_GROUP }}
           name: ${{ env.CLUSTER_NAME }}
           private-cluster: ${{ env.CLUSTER_TYPE == 'managedClusters' && steps.isPrivate.outputs.PRIVATE_CLUSTER == 'true' }}
